@@ -1,0 +1,32 @@
+#pragma kernel UpdateState
+
+RWTexture2D<float4> _NextState;
+Texture2D<float4> _CurrentState;
+SamplerState sampler_CurrentState;
+
+float _DeltaTime;
+float _Dissipation;
+float2 _BrushPosition;
+float _BrushRadius;
+float _BrushStrength;
+float2 _TextureSize;
+
+[numthreads(8, 8, 1)]
+void UpdateState(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_TextureSize.x || id.y >= (uint)_TextureSize.y)
+    {
+        return;
+    }
+
+    int2 coord = int2(id.xy);
+    float2 uv = (float2(coord) + 0.5) / _TextureSize;
+    float4 previous = _CurrentState.Load(int3(coord, 0));
+
+    float brushDistance = distance(uv, _BrushPosition);
+    float brushMask = saturate(1.0 - brushDistance / max(_BrushRadius, 1e-4));
+    float injected = brushMask * _BrushStrength * _DeltaTime;
+
+    float value = max(previous.r * (1.0 - _Dissipation * _DeltaTime), injected);
+    _NextState[coord] = float4(value, value, value, 1.0);
+}
