@@ -48,6 +48,10 @@ Start from:
 
 - `assets/templates/urp-unlit-material.shader`
 - `assets/templates/urp-forward-lit.shader`
+- `assets/templates/urp-transparent.shader`
+- `assets/includes/SDFPrimitives.hlsl`
+- `assets/includes/WaveFunctions.hlsl`
+- `assets/includes/Noise.hlsl`
 - `reference/recipes/mesh-surface-effect.md`
 - `reference/recipes/object-space-raymarch.md`
 
@@ -124,6 +128,7 @@ Interpretation rules:
 | --- | --- | --- | --- |
 | Stylized surface shader | `reference/recipes/mesh-surface-effect.md` | `assets/templates/urp-unlit-material.shader` | `lighting-model`, `color-palette`, `texture-sampling` |
 | Custom lit material | `reference/recipes/mesh-surface-effect.md` | `assets/templates/urp-forward-lit.shader` | `lighting-model`, `shadow-techniques`, `ambient-occlusion` |
+| Transparent / alpha blend material | `reference/recipes/mesh-surface-effect.md` | `assets/templates/urp-transparent.shader` | `lighting-model`, `color-palette`, `texture-sampling` |
 | Fullscreen distortion or post effect | `reference/recipes/fullscreen-post-effect.md` | `assets/templates/urp-fullscreen.shader` + `assets/templates/urp-renderer-feature.cs` | `post-processing`, `camera-effects`, `anti-aliasing` |
 | Cross-frame simulation | `reference/recipes/persistent-simulation.md` | `assets/templates/urp-ping-pong-update.shader` + `assets/templates/urp-ping-pong-simulation-driver.cs` | `fluid-simulation`, `cellular-automata`, `simulation-physics` |
 | Compute-driven simulation | `reference/recipes/compute-simulation.md` | `assets/templates/compute-simulation.compute` + `assets/templates/compute-simulation-driver.cs` | `fluid-simulation`, `simulation-physics`, `multipass-buffer` |

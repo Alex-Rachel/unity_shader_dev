@@ -14,7 +14,7 @@ namespace SkillTemplates.URP
             public string profilerTag = "Skill Fullscreen Pass";
         }
 
-        private sealed class FullscreenTemplatePass : ScriptableRenderPass
+        private sealed class FullscreenTemplatePass : ScriptableRenderPass, System.IDisposable
         {
             private readonly Material material;
             private readonly ProfilingSampler profilingSampler;
@@ -84,7 +84,8 @@ namespace SkillTemplates.URP
             };
         }
 
-        public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
+#if UNITY_2023_1_OR_NEWER
+        public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
         {
             if (settings.material == null)
             {
@@ -92,8 +93,27 @@ namespace SkillTemplates.URP
             }
 
             pass.SetTarget(renderer.cameraColorTargetHandle);
+        }
+#endif
+
+        public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
+        {
+            if (settings.material == null)
+            {
+                return;
+            }
+
+#if !UNITY_2023_1_OR_NEWER
+            pass.SetTarget(renderer.cameraColorTargetHandle);
+#endif
+
             renderer.EnqueuePass(pass);
         }
+
+        // Multi-camera safety note: This feature allocates a temporary RTHandle per camera.
+        // When multiple cameras render simultaneously, each gets its own temp target.
+        // Ensure the feature is only added to the desired camera(s) via renderer feature
+        // filtering or by checking camera type in AddRenderPasses.
 
         protected override void Dispose(bool disposing)
         {

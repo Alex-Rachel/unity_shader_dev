@@ -38,6 +38,7 @@ Shader "SkillExamples/URP/Water/OceanSurfaceExample"
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "../includes/WaveFunctions.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseMap_ST;
@@ -70,27 +71,21 @@ Shader "SkillExamples/URP/Water/OceanSurfaceExample"
                 float4 shadowCoord : TEXCOORD3;
             };
 
-            float SampleWaveHeight(float2 xz, float time)
+            float SampleWaveHeightLocal(float2 xz, float time)
             {
-                float waveA = sin(xz.x * _WaveFrequency + time * _WaveSpeed);
-                float waveB = cos(xz.y * (_WaveFrequency * 0.73) - time * (_WaveSpeed * 1.11));
-                return (waveA + waveB) * _WaveAmplitude;
+                return SampleWaveHeight(xz, time, _WaveFrequency, _WaveSpeed, _WaveAmplitude);
             }
 
-            float3 SampleWaveNormal(float2 xz, float time)
+            float3 SampleWaveNormalLocal(float2 xz, float time)
             {
-                float epsilon = 0.05;
-                float h = SampleWaveHeight(xz, time);
-                float hx = SampleWaveHeight(xz + float2(epsilon, 0.0), time);
-                float hz = SampleWaveHeight(xz + float2(0.0, epsilon), time);
-                return normalize(float3(h - hx, epsilon, h - hz));
+                return SampleWaveNormal(xz, time, _WaveFrequency, _WaveSpeed, _WaveAmplitude);
             }
 
             Varyings Vert(Attributes input)
             {
                 Varyings output;
                 float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
-                positionWS.y += SampleWaveHeight(positionWS.xz, _Time.y);
+                positionWS.y += SampleWaveHeightLocal(positionWS.xz, _Time.y);
 
                 VertexPositionInputs positionInputs = GetVertexPositionInputs(TransformWorldToObject(positionWS));
                 output.positionCS = positionInputs.positionCS;
@@ -104,7 +99,7 @@ Shader "SkillExamples/URP/Water/OceanSurfaceExample"
             half4 Frag(Varyings input) : SV_Target
             {
                 half3 baseSample = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-                half3 waveNormal = SampleWaveNormal(input.positionWS.xz, _Time.y);
+                half3 waveNormal = SampleWaveNormalLocal(input.positionWS.xz, _Time.y);
                 half3 normalWS = normalize(lerp(input.normalWS, waveNormal, 0.8));
                 half3 viewDirWS = SafeNormalize(GetCameraPositionWS() - input.positionWS);
 
@@ -117,7 +112,7 @@ Shader "SkillExamples/URP/Water/OceanSurfaceExample"
                 half fresnel = pow(1.0h - saturate(dot(normalWS, viewDirWS)), _FresnelPower);
 
                 half3 ambient = lerp(_DeepColor.rgb, _ShallowColor.rgb, 0.35) * _AmbientColor.rgb;
-                half3 color = ambient + diffuse + specular * mainLight.color + fresnel * 0.25h;
+                half3 color = ambient + diffuse + specular * mainLight.color + lerp(diffuse, _ShallowColor.rgb, fresnel);
                 return half4(color, 1.0);
             }
             ENDHLSL

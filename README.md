@@ -33,6 +33,7 @@
 | Fullscreen / Post | 色调映射、扭曲、模糊、边缘检测 | [fullscreen-post-effect.md](I:\CustomWorkSpace\unity_shader_dev\reference\recipes\fullscreen-post-effect.md) |
 | Persistent Simulation | 反馈效果、元胞自动机、反应扩散 | [persistent-simulation.md](I:\CustomWorkSpace\unity_shader_dev\reference\recipes\persistent-simulation.md) |
 | Compute Simulation | compute 驱动的 grid update | [compute-simulation.md](I:\CustomWorkSpace\unity_shader_dev\reference\recipes\compute-simulation.md) |
+| Transparent / Alpha Blend | 透明材质、Alpha Clipping | [mesh-surface-effect.md](I:\CustomWorkSpace\unity_shader_dev\reference\recipes\mesh-surface-effect.md) |
 
 ## 支持边界
 
@@ -99,6 +100,19 @@ python "C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick
 - [assets/examples](I:\CustomWorkSpace\unity_shader_dev\assets\examples)
   - 用于说明文件形态和组合方式的参考示例
 
+### Shared Includes
+
+- [assets/includes](I:\CustomWorkSpace\unity_shader_dev\assets\includes)
+  - SDF、波浪、噪声等可复用 .hlsl include 文件
+  - [SDFPrimitives.hlsl](I:\CustomWorkSpace\unity_shader_dev\assets\includes\SDFPrimitives.hlsl)：sdSphere、sdBox、sdTorus、sdCapsule、opUnion、opSubtraction、opIntersection、smin、rot2D
+  - [WaveFunctions.hlsl](I:\CustomWorkSpace\unity_shader_dev\assets\includes\WaveFunctions.hlsl)：SampleWaveHeight、SampleWaveNormal
+  - [Noise.hlsl](I:\CustomWorkSpace\unity_shader_dev\assets\includes\Noise.hlsl)：hash21、hash22、valueNoise、fbm
+
+### 知识库索引
+
+- [technique-index.md](I:\CustomWorkSpace\unity_shader_dev\reference\technique-index.md)
+  - 关键词→文件路径→配送路径的快速映射表
+
 ### Legacy 技法库
 
 - [techniques](I:\CustomWorkSpace\unity_shader_dev\techniques)
@@ -120,6 +134,7 @@ python "C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick
 - [mesh-surface-effect.md](I:\CustomWorkSpace\unity_shader_dev\reference\recipes\mesh-surface-effect.md)
 - [urp-unlit-material.shader](I:\CustomWorkSpace\unity_shader_dev\assets\templates\urp-unlit-material.shader)
 - [urp-forward-lit.shader](I:\CustomWorkSpace\unity_shader_dev\assets\templates\urp-forward-lit.shader)
+- [urp-transparent.shader](I:\CustomWorkSpace\unity_shader_dev\assets\templates\urp-transparent.shader)
 
 ### Fullscreen / Post
 

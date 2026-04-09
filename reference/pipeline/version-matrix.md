@@ -40,6 +40,40 @@ Use this file to choose a safe API shape before generating Unity URP code.
 - renderer feature compatibility mode versus RenderGraph path
 - scene texture availability and renderer settings for opaque/depth textures
 
+## SetupRenderPasses Conditional Compilation
+
+Starting with Unity 2023.1, `ScriptableRendererFeature` introduces a virtual `SetupRenderPasses` method.
+This method is the recommended location for acquiring `RTHandle` references (e.g., `renderer.cameraColorTargetHandle`).
+
+**In Unity 2022 and earlier**, `AddRenderPasses` is the only injection point for setting render pass targets.
+
+### Pattern
+
+```csharp
+#if UNITY_2023_1_OR_NEWER
+public override void SetupRenderPasses(ScriptableRenderer renderer, in RenderingData renderingData)
+{
+    // Acquire RTHandle references here
+    pass.SetTarget(renderer.cameraColorTargetHandle);
+}
+#endif
+
+public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
+{
+#if !UNITY_2023_1_OR_NEWER
+    // Fallback for Unity 2022: acquire targets here
+    pass.SetTarget(renderer.cameraColorTargetHandle);
+#endif
+    renderer.EnqueuePass(pass);
+}
+```
+
+### Why
+
+- In Unity 2023.1+, calling `renderer.cameraColorTargetHandle` inside `AddRenderPasses` may generate warnings about accessing camera targets at the wrong phase
+- `SetupRenderPasses` runs at the correct phase for target acquisition
+- Using `#if UNITY_2023_1_OR_NEWER` ensures backward compatibility with Unity 2022 LTS
+
 ## Default Decision Rule
 
 When Unity or URP version is unknown:

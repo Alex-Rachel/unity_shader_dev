@@ -15,18 +15,33 @@ namespace SkillTemplates.URP
 
         private RenderTexture currentState;
         private RenderTexture nextState;
+        private Vector2Int lastResolution;
 
         private void OnEnable()
         {
             AllocateTextures();
             Clear(currentState);
             Clear(nextState);
+            lastResolution = resolution;
         }
 
         private void OnDisable()
         {
             ReleaseTexture(ref currentState);
             ReleaseTexture(ref nextState);
+        }
+
+        private void OnValidate()
+        {
+            if (resolution != lastResolution && Application.isPlaying)
+            {
+                ReleaseTexture(ref currentState);
+                ReleaseTexture(ref nextState);
+                AllocateTextures();
+                Clear(currentState);
+                Clear(nextState);
+                lastResolution = resolution;
+            }
         }
 
         private void Update()
@@ -43,6 +58,9 @@ namespace SkillTemplates.URP
             updateMaterial.SetFloat("_BrushRadius", brushRadius);
             updateMaterial.SetFloat("_BrushStrength", brushStrength);
 
+            // Note: Graphics.Blit is used here for simplicity and URP compatibility mode support.
+            // For Unity 6+ RenderGraph workflows, consider replacing with Blitter.BlitCameraTexture
+            // or CommandBuffer.Blit depending on the render pass context.
             Graphics.Blit(currentState, nextState, updateMaterial, 0);
             Swap();
         }

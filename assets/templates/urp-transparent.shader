@@ -1,4 +1,4 @@
-Shader "SkillTemplates/URP/ForwardLit"
+Shader "SkillTemplates/URP/Transparent"
 {
     Properties
     {
@@ -9,20 +9,18 @@ Shader "SkillTemplates/URP/ForwardLit"
         _AmbientColor("Ambient Color", Color) = (0.12,0.12,0.12,1)
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.25
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
-        [Enum(UnityEngine.Rendering.CullMode)] _Cull("Cull Mode", Float) = 2.0
-        [HideInInspector] _QueueOffset("Queue Offset", Range(-50, 50)) = 0.0
     }
 
     SubShader
     {
         Tags
         {
-            "RenderType" = "Opaque"
+            "RenderType" = "Transparent"
             "RenderPipeline" = "UniversalPipeline"
-            "Queue" = "Geometry"
+            "Queue" = "Transparent"
         }
 
-        // ---- ShadowCaster Pass ----
+        // ---- ShadowCaster Pass (only active with Alpha Clipping) ----
         Pass
         {
             Name "ShadowCaster"
@@ -31,7 +29,7 @@ Shader "SkillTemplates/URP/ForwardLit"
             ZWrite On
             ZTest LEqual
             ColorMask 0
-            Cull [_Cull]
+            Cull Back
 
             HLSLPROGRAM
             #pragma vertex ShadowVert
@@ -54,7 +52,6 @@ Shader "SkillTemplates/URP/ForwardLit"
                 float _NormalScale;
                 float _Smoothness;
                 float _Cutoff;
-                float _QueueOffset;
             CBUFFER_END
 
             TEXTURE2D(_BaseMap);
@@ -117,7 +114,7 @@ Shader "SkillTemplates/URP/ForwardLit"
 
             ZWrite On
             ColorMask R
-            Cull [_Cull]
+            Cull Back
 
             HLSLPROGRAM
             #pragma vertex DepthVert
@@ -136,7 +133,6 @@ Shader "SkillTemplates/URP/ForwardLit"
                 float _NormalScale;
                 float _Smoothness;
                 float _Cutoff;
-                float _QueueOffset;
             CBUFFER_END
 
             TEXTURE2D(_BaseMap);
@@ -180,13 +176,15 @@ Shader "SkillTemplates/URP/ForwardLit"
             ENDHLSL
         }
 
-        // ---- Forward Lit Pass ----
+        // ---- Forward Transparent Pass ----
         Pass
         {
-            Name "ForwardLit"
+            Name "ForwardTransparent"
             Tags { "LightMode" = "UniversalForward" }
 
-            Cull [_Cull]
+            Blend SrcAlpha OneMinusSrcAlpha
+            ZWrite Off
+            Cull Back
 
             HLSLPROGRAM
             #pragma vertex Vert
@@ -211,7 +209,6 @@ Shader "SkillTemplates/URP/ForwardLit"
                 float _NormalScale;
                 float _Smoothness;
                 float _Cutoff;
-                float _QueueOffset;
             CBUFFER_END
 
             TEXTURE2D(_BaseMap);
@@ -308,67 +305,6 @@ Shader "SkillTemplates/URP/ForwardLit"
                 #endif
 
                 return half4(color, alpha);
-            }
-            ENDHLSL
-        }
-
-        // ---- Meta Pass (Lightmapping) ----
-        Pass
-        {
-            Name "Meta"
-            Tags { "LightMode" = "Meta" }
-
-            Cull Off
-
-            HLSLPROGRAM
-            #pragma vertex MetaVert
-            #pragma fragment MetaFrag
-            #pragma target 3.5
-
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/MetaPass.hlsl"
-
-            CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor;
-                float4 _BaseMap_ST;
-                float4 _AmbientColor;
-                float _NormalScale;
-                float _Smoothness;
-                float _Cutoff;
-                float _QueueOffset;
-            CBUFFER_END
-
-            TEXTURE2D(_BaseMap);
-            SAMPLER(sampler_BaseMap);
-
-            struct MetaAttributes
-            {
-                float4 positionOS : POSITION;
-                float2 uv : TEXCOORD0;
-                float2 uv1 : TEXCOORD1;
-                float2 uv2 : TEXCOORD2;
-            };
-
-            struct MetaVaryings
-            {
-                float4 positionCS : SV_POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
-            MetaVaryings MetaVert(MetaAttributes input)
-            {
-                MetaVaryings output;
-                output.positionCS = MetaVertexPosition(input.positionOS, input.uv1, input.uv2, unity_LightmapST, unity_DynamicLightmapST);
-                output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
-                return output;
-            }
-
-            half4 MetaFrag(MetaVaryings input) : SV_Target
-            {
-                half4 albedoSample = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
-                half3 albedo = albedoSample.rgb * _BaseColor.rgb;
-                half3 emission = half3(0, 0, 0);
-                return MetaFragment(albedo, emission);
             }
             ENDHLSL
         }

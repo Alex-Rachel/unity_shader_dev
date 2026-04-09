@@ -31,6 +31,8 @@ Shader "SkillExamples/URP/Raymarch/ObjectRaymarchExample"
             #pragma target 3.5
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "../includes/SDFPrimitives.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _SurfaceColor;
@@ -53,16 +55,11 @@ Shader "SkillExamples/URP/Raymarch/ObjectRaymarchExample"
                 float3 cameraOS : TEXCOORD1;
             };
 
-            float SphereSdf(float3 p, float radius)
-            {
-                return length(p) - radius;
-            }
-
             float SceneSdf(float3 p)
             {
-                float sphere = SphereSdf(p, 0.28);
-                float orbitSphere = SphereSdf(p - float3(0.23, 0.08, 0.0), 0.12);
-                return min(sphere, orbitSphere);
+                float sphere = sdSphere(p, 0.28);
+                float orbitSphere = sdSphere(p - float3(0.23, 0.08, 0.0), 0.12);
+                return opUnion(sphere, orbitSphere);
             }
 
             float3 EstimateNormal(float3 p)
@@ -123,7 +120,7 @@ Shader "SkillExamples/URP/Raymarch/ObjectRaymarchExample"
                     {
                         float3 normalOS = EstimateNormal(p);
                         float3 normalWS = normalize(TransformObjectToWorldNormal(normalOS));
-                        float3 lightDirWS = normalize(float3(0.35, 0.75, 0.2));
+                        float3 lightDirWS = GetMainLight().direction;
                         float ndotl = saturate(dot(normalWS, lightDirWS));
                         float3 color = _AmbientColor.rgb + _SurfaceColor.rgb * ndotl + glow * _GlowStrength;
                         return half4(color, 1.0);

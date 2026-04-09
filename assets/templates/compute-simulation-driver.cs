@@ -18,6 +18,7 @@ namespace SkillTemplates.URP
         private int updateKernel = -1;
         private RenderTexture currentState;
         private RenderTexture nextState;
+        private Vector2Int lastResolution;
 
         private void OnEnable()
         {
@@ -30,12 +31,26 @@ namespace SkillTemplates.URP
             AllocateTextures();
             Clear(currentState);
             Clear(nextState);
+            lastResolution = resolution;
         }
 
         private void OnDisable()
         {
             ReleaseTexture(ref currentState);
             ReleaseTexture(ref nextState);
+        }
+
+        private void OnValidate()
+        {
+            if (resolution != lastResolution && Application.isPlaying)
+            {
+                ReleaseTexture(ref currentState);
+                ReleaseTexture(ref nextState);
+                AllocateTextures();
+                Clear(currentState);
+                Clear(nextState);
+                lastResolution = resolution;
+            }
         }
 
         private void Update()
@@ -52,7 +67,7 @@ namespace SkillTemplates.URP
             simulationCompute.SetVector("_BrushPosition", brushPosition);
             simulationCompute.SetFloat("_BrushRadius", brushRadius);
             simulationCompute.SetFloat("_BrushStrength", brushStrength);
-            simulationCompute.SetVector("_TextureSize", new Vector4(resolution.x, resolution.y, 0f, 0f));
+            simulationCompute.SetVector("_TextureSize", new Vector2(resolution.x, resolution.y));
 
             int groupsX = Mathf.CeilToInt(resolution.x / (float)ThreadGroupSize);
             int groupsY = Mathf.CeilToInt(resolution.y / (float)ThreadGroupSize);

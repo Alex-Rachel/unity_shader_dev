@@ -54,6 +54,22 @@ if (-not (Test-Path (Join-Path $Root "reference\pipeline\authoring-contract.md")
     Add-Failure "reference/pipeline/authoring-contract.md is missing"
 }
 
+if (-not (Test-Path (Join-Path $Root "assets\templates\urp-transparent.shader"))) {
+    Add-Failure "assets/templates/urp-transparent.shader is missing"
+}
+
+if (-not (Test-Path (Join-Path $Root "assets\includes\SDFPrimitives.hlsl"))) {
+    Add-Failure "assets/includes/SDFPrimitives.hlsl is missing"
+}
+
+if (-not (Test-Path (Join-Path $Root "assets\includes\WaveFunctions.hlsl"))) {
+    Add-Failure "assets/includes/WaveFunctions.hlsl is missing"
+}
+
+if (-not (Test-Path (Join-Path $Root "assets\includes\Noise.hlsl"))) {
+    Add-Failure "assets/includes/Noise.hlsl is missing"
+}
+
 if ($failures.Count -gt 0) {
     Write-Host "Validation failed:" -ForegroundColor Red
     $failures | ForEach-Object { Write-Host " - $_" -ForegroundColor Red }
