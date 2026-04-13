@@ -257,6 +257,10 @@ Shader "SkillTemplates/URP/ForwardLit"
                 return output;
             }
 
+            // Note: NormalMap shares BaseMap UV (TRANSFORM_TEX result from vertex stage).
+            // Independent NormalMap Tiling/Offset is not supported in this template.
+            // To enable it: add `float4 _NormalMap_ST;` to the CBUFFER and use
+            // TRANSFORM_TEX(input.uv, _NormalMap) in the vertex stage instead.
             half3 SampleNormalTS(float2 uv)
             {
                 half4 packed = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv);

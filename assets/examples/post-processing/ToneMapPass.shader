@@ -50,9 +50,8 @@ Shader "SkillExamples/URP/PostProcessing/ToneMapPass"
             Varyings Vert(Attributes input)
             {
                 Varyings output;
-                output.uv = float2((input.vertexID << 1) & 2, input.vertexID & 2);
-                output.positionCS = float4(output.uv * 2.0 - 1.0, 0.0, 1.0);
-                output.positionCS.y *= -1.0;
+                output.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
+                output.uv = GetFullScreenTriangleTexCoord(input.vertexID);
                 return output;
             }
 

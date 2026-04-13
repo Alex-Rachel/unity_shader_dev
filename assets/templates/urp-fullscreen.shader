@@ -53,9 +53,10 @@ Shader "SkillTemplates/URP/FullscreenEffect"
             Varyings Vert(Attributes input)
             {
                 Varyings output;
-                output.uv = float2((input.vertexID << 1) & 2, input.vertexID & 2);
-                output.positionCS = float4(output.uv * 2.0 - 1.0, 0.0, 1.0);
-                output.positionCS.y *= -1.0;
+                // Use URP Core macros for platform-correct NDC and UV.
+                // These handle UNITY_UV_STARTS_AT_TOP and Blitter compatibility automatically.
+                output.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
+                output.uv = GetFullScreenTriangleTexCoord(input.vertexID);
                 return output;
             }
 
