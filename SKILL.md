@@ -1,193 +1,102 @@
 ---
 name: unity-shader-dev
-description: URP-first Unity shader engineering skill for building, porting, debugging, and optimizing executable ShaderLab/HLSL material shaders, fullscreen effects, renderer features, custom render passes, RenderTexture/RTHandle pipelines, and persistent GPU simulations. Use when Codex must ship runnable Unity URP shader code instead of prototype GLSL snippets.
+description: URP-first Unity shader engineering for building, porting, debugging, and optimizing ShaderLab/HLSL material shaders, fullscreen effects, renderer features, custom render passes, RenderTexture/RTHandle pipelines, and persistent GPU simulations. Use when: (1) writing or modifying Unity URP shader code (ShaderLab/HLSL/C#), (2) porting GLSL/ShaderToy prototypes to Unity URP, (3) creating fullscreen post-processing effects with renderer features, (4) building ping-pong or compute-driven GPU simulations, (5) debugging URP shader compile errors, pink materials, or missing passes, (6) implementing object-space raymarching or water surfaces in URP, (7) choosing between hand-written HLSL vs Shader Graph. Do NOT use for pure GLSL/ShaderToy prototyping (use shader-dev skill instead), Built-in RP, or HDRP work.
 ---
 
 # Unity Shader Dev
 
-Use this skill to deliver production-oriented Unity URP shader work. Treat it as an engineering workflow, not a shader scrapbook.
-
-## Scope
-
-- Target pipeline: Unity URP
-- Primary output: executable ShaderLab, HLSL, C#, and project integration steps
-- Secondary output: technique selection, math explanation, and prototype algorithm notes
-
-## Non-Goals
-
-- Do not treat this skill as a Built-in RP or HDRP authority.
-- Do not paste legacy technique snippets directly into Unity unless the section explicitly says `Unity URP Executable`.
-- Do not answer with only ShaderToy-style GLSL when the user asked for Unity code.
-
-## Execution Contract
-
-When using this skill, produce runnable Unity artifacts first and explanation second.
-
-Every substantial implementation should specify:
-
-- Output type: `material shader`, `fullscreen shader`, `renderer feature`, `render pass`, `simulation driver`, or `supporting include`
-- Required files to create or modify
-- URP assumptions and package expectations
-- Material properties and CBUFFER alignment
-- Render target ownership when history or ping-pong state is involved
-- Validation steps in Unity
+Deliver production-oriented Unity URP shader work. Runnable artifacts first, explanation second.
 
 ## Delivery Paths
 
 ### 1. Material / Surface Path
 
-Use for:
+Mesh-local shading, triplanar/terrain surfaces, stylized/custom-lit materials, water, object-space raymarching.
 
-- Mesh-local shading
-- Triplanar or terrain surface work
-- Stylized or custom-lit materials
-- Water surface shading
-- Object-space raymarching inside bounds
-
-Start from:
-
-- `assets/templates/urp-unlit-material.shader`
-- `assets/templates/urp-forward-lit.shader`
-- `assets/templates/urp-transparent.shader`
-- `assets/includes/SDFPrimitives.hlsl`
-- `assets/includes/WaveFunctions.hlsl`
-- `assets/includes/Noise.hlsl`
-- `reference/recipes/mesh-surface-effect.md`
-- `reference/recipes/object-space-raymarch.md`
+Templates: `assets/templates/urp-unlit-material.shader` | `assets/templates/urp-forward-lit.shader` | `assets/templates/urp-transparent.shader`
+Includes: `assets/includes/SDFPrimitives.hlsl` | `assets/includes/WaveFunctions.hlsl` | `assets/includes/Noise.hlsl`
+Recipe: `reference/recipes/mesh-surface-effect.md` | `reference/recipes/object-space-raymarch.md` | `reference/recipes/water-surface.md`
 
 ### 2. Fullscreen / Post Path
 
-Use for:
+Camera-space effects, color grading, distortion, blur, edge detection, screen-space ambient effects.
 
-- Camera-space effects
-- Color grading, distortion, blur, edge detection
-- Screen-space ambient effects
-- Post-processing style prototypes
-
-Start from:
-
-- `assets/templates/urp-fullscreen.shader`
-- `assets/templates/urp-renderer-feature.cs`
-- `reference/recipes/fullscreen-post-effect.md`
+Templates: `assets/templates/urp-fullscreen.shader` | `assets/templates/urp-renderer-feature.cs`
+Recipe: `reference/recipes/fullscreen-post-effect.md`
 
 ### 3. Persistent Simulation Path
 
-Use for:
+Fluids, cellular automata, reaction-diffusion, GPU particles with history, compute-driven grid updates.
 
-- Fluids
-- Cellular automata
-- Reaction-diffusion
-- GPU particles with history
-- Accumulation and temporal feedback
-- Compute-driven grid updates when the request explicitly needs a kernel-based path
-
-Start from:
-
-- `assets/templates/urp-ping-pong-update.shader`
-- `assets/templates/urp-ping-pong-simulation-driver.cs`
-- `assets/templates/compute-simulation.compute`
-- `assets/templates/compute-simulation-driver.cs`
-- `reference/recipes/persistent-simulation.md`
-- `reference/recipes/compute-simulation.md`
-
-## Read Order
-
-1. Classify the user request by delivery path.
-2. Load the matching recipe from `reference/recipes/`.
-3. Reuse the closest executable template from `assets/templates/`.
-4. Pull formulas or algorithm detail from `techniques/` and `reference/` only as needed.
-5. Convert algorithm snippets into Unity URP code that matches the selected template.
-
-## Source-of-Truth Hierarchy
-
-When documents disagree, use this priority:
-
-1. `reference/pipeline/*.md`
-2. `reference/recipes/*.md`
-3. `assets/templates/*`
-4. `SKILL.md`
-5. `techniques/*.md`
-6. `reference/*.md` legacy deep references
-
-## Prototype vs Executable Rule
-
-The repository intentionally contains two classes of content:
-
-- `Executable Unity content`: templates, recipes, and pipeline references
-- `Prototype algorithm content`: most legacy `techniques/*.md` and `reference/*.md` snippets
-
-Interpretation rules:
-
-- Treat legacy `glsl` code blocks as algorithm notes.
-- Translate `vec*`, `mix`, `fract`, `mod`, `mainImage`, `gl_FragCoord`, `iChannel*`, and `iResolution` into Unity URP equivalents before shipping code.
-- Only return raw GLSL when the user explicitly asks for prototype math rather than Unity implementation.
+Templates: `assets/templates/urp-ping-pong-update.shader` + `assets/templates/urp-ping-pong-simulation-driver.cs` (pixel path) | `assets/templates/compute-simulation.compute` + `assets/templates/compute-simulation-driver.cs` (compute path)
+Recipes: `reference/recipes/persistent-simulation.md` | `reference/recipes/compute-simulation.md`
 
 ## Routing Table
 
-| User asks for | Recipe | Primary template | Common legacy sources |
+| User asks for | Recipe | Primary template | Legacy technique sources |
 | --- | --- | --- | --- |
-| Stylized surface shader | `reference/recipes/mesh-surface-effect.md` | `assets/templates/urp-unlit-material.shader` | `lighting-model`, `color-palette`, `texture-sampling` |
-| Custom lit material | `reference/recipes/mesh-surface-effect.md` | `assets/templates/urp-forward-lit.shader` | `lighting-model`, `shadow-techniques`, `ambient-occlusion` |
-| Transparent / alpha blend material | `reference/recipes/mesh-surface-effect.md` | `assets/templates/urp-transparent.shader` | `lighting-model`, `color-palette`, `texture-sampling` |
-| Fullscreen distortion or post effect | `reference/recipes/fullscreen-post-effect.md` | `assets/templates/urp-fullscreen.shader` + `assets/templates/urp-renderer-feature.cs` | `post-processing`, `camera-effects`, `anti-aliasing` |
-| Cross-frame simulation | `reference/recipes/persistent-simulation.md` | `assets/templates/urp-ping-pong-update.shader` + `assets/templates/urp-ping-pong-simulation-driver.cs` | `fluid-simulation`, `cellular-automata`, `simulation-physics` |
-| Compute-driven simulation | `reference/recipes/compute-simulation.md` | `assets/templates/compute-simulation.compute` + `assets/templates/compute-simulation-driver.cs` | `fluid-simulation`, `simulation-physics`, `multipass-buffer` |
-| Raymarched object | `reference/recipes/object-space-raymarch.md` | `assets/templates/urp-unlit-material.shader` | `ray-marching`, `sdf-3d`, `normal-estimation` |
-| Water surface | `reference/recipes/water-surface.md` | `assets/templates/urp-forward-lit.shader` | `water-ocean`, `lighting-model`, `atmospheric-scattering` |
+| Stylized surface shader | `mesh-surface-effect.md` | `urp-unlit-material.shader` | lighting-model, color-palette, texture-sampling |
+| Custom lit material | `mesh-surface-effect.md` | `urp-forward-lit.shader` | lighting-model, shadow-techniques, ambient-occlusion |
+| Transparent / alpha blend | `mesh-surface-effect.md` | `urp-transparent.shader` | lighting-model, color-palette, texture-sampling |
+| Fullscreen post effect | `fullscreen-post-effect.md` | `urp-fullscreen.shader` + `urp-renderer-feature.cs` | post-processing, camera-effects, anti-aliasing |
+| Cross-frame simulation | `persistent-simulation.md` | `urp-ping-pong-update.shader` + driver | fluid-simulation, cellular-automata, simulation-physics |
+| Compute-driven simulation | `compute-simulation.md` | `compute-simulation.compute` + driver | fluid-simulation, simulation-physics, multipass-buffer |
+| Raymarched object | `object-space-raymarch.md` | `urp-unlit-material.shader` | ray-marching, sdf-3d, normal-estimation |
+| Water surface | `water-surface.md` | `urp-forward-lit.shader` | water-ocean, lighting-model, atmospheric-scattering |
+
+## Read Order
+
+1. Classify request by delivery path.
+2. Load matching recipe from `reference/recipes/`.
+3. Reuse closest template from `assets/templates/`.
+4. Pull algorithm detail from `techniques/` and `reference/` only as needed.
+
+## Source-of-Truth Hierarchy
+
+1. `reference/pipeline/*.md` → 2. `reference/recipes/*.md` → 3. `assets/templates/*` → 4. `SKILL.md` → 5. `techniques/*.md` → 6. `reference/*.md` (legacy)
 
 ## Pipeline References
 
-Load these files before implementing non-trivial work:
+Load from `reference/pipeline/` before non-trivial work. Key files by scenario:
 
-- `reference/pipeline/authoring-contract.md`
-- `reference/pipeline/version-matrix.md`
-- `reference/pipeline/porting-rules.md`
-- `reference/pipeline/debugging.md`
-- `reference/pipeline/performance.md`
-- `reference/pipeline/compatibility.md`
-- `reference/pipeline/rendergraph-compatibility.md`
-- `reference/pipeline/rendering-path-boundaries.md`
-- `reference/pipeline/shadergraph-boundary.md`
+- **API shape / version**: `version-matrix.md`, `compatibility.md`
+- **Renderer integration**: `rendergraph-compatibility.md`, `rendering-path-boundaries.md`
+- **Porting GLSL**: `porting-rules.md`, `authoring-contract.md`
+- **Debugging**: `debugging.md`
+- **Performance**: `performance.md`
+- **Shader Graph requests**: `shadergraph-boundary.md`
 
-## Legacy Knowledge Base
+## Prototype vs Executable Rule
 
-The large `techniques/*.md` and `reference/*.md` files are still useful for:
+- `techniques/*.md` and `reference/*.md` contain algorithm notes, not shippable Unity code.
+- Translate GLSL idioms before shipping: `vec*` → `float*`, `mix` → `lerp`, `fract` → `frac`, `mod` → `fmod`, `mainImage` → URP fragment, `gl_FragCoord` → UV/clip-space, `iResolution` → `_ScreenParams`, `iChannel*` → bound textures/RTHandles, `iMouse`/`iFrame` → C# driven params.
+- Return raw GLSL only when user explicitly asks for prototype math.
 
-- Formula derivation
-- Variant comparison
-- Troubleshooting edge cases
-- Effect ideation
+## Output Contract
 
-They are not the first place to copy code from.
+Every substantial implementation must specify:
 
-## Required Output Shape
-
-When producing a Unity implementation, include:
-
-- File list
-- Which template the solution is based on
-- Which recipe governs the integration
-- Which legacy technique files supplied the math
-- Unity validation steps
+- **Output type**: `material shader` | `fullscreen shader` | `renderer feature` | `render pass` | `simulation driver` | `supporting include`
+- **Files** to create or modify
+- **Template basis** and **governing recipe**
+- **Legacy technique sources** for the math
+- **URP assumptions** and package expectations
+- **Material properties** and CBUFFER alignment (material shaders)
+- **Render target ownership** when history/ping-pong state is involved (simulations)
+- **Unity validation steps**
 
 ## Engineering Rules
 
-- Prefer HLSL and ShaderLab syntax in final output.
+- Final output in HLSL and ShaderLab syntax.
 - Keep `Properties` and `UnityPerMaterial` aligned.
-- For fullscreen work, describe the renderer feature or driver ownership explicitly.
-- For persistent simulation, state buffer ownership, update order, resize policy, and invalidation conditions.
-- Check `reference/pipeline/version-matrix.md` before committing to a URP API shape.
-- Check `reference/pipeline/rendering-path-boundaries.md` before promising RenderGraph, compute-heavy, HDRP, or XR-specific work.
-- Check `reference/pipeline/shadergraph-boundary.md` before choosing pure HLSL output for a Shader Graph-oriented request.
-- Mention unsupported or cautionary paths when the request implicitly needs APIs or workflows not covered by the current templates.
+- For fullscreen work: describe renderer feature or driver ownership explicitly.
+- For persistent simulation: state buffer ownership, update order, resize policy, invalidation conditions.
+- Mention unsupported or cautionary paths when the request needs APIs not covered by current templates.
 
-## Validation
+## Relationship to shader-dev Skill
 
-When editing this skill, run:
+The `shader-dev` skill covers GLSL/ShaderToy prototyping with 36 technique files. This skill (`unity-shader-dev`) is the Unity URP execution layer. When a request involves both prototyping and Unity deployment:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\normalize_legacy_docs.ps1
-powershell -ExecutionPolicy Bypass -File .\scripts\validate_skill_docs.ps1
-```
-
-Do not claim the skill is cleaned up until validation passes.
+1. Use `shader-dev` techniques for algorithm exploration and GLSL prototyping.
+2. Use this skill to port and integrate into Unity URP.
+3. Never return ShaderToy-style GLSL when the user asked for Unity code.
